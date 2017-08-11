@@ -4,6 +4,19 @@
 
 include_recipe 'chef-yum-docker'
 
+
+# create files to deal with this error: Can't create ID mappings: No subuid ranges found for user "dockremap"
+# files are needed for the `--userns-remap argument`
+file '/etc/subuid' do
+  content 'dockremap:400000:65526'
+  mode '0644'
+end
+
+file '/etc/subgid' do
+  content 'dockremap:400000:65526'
+  mode '0644'
+end
+
 node['owi_docker']['service'].each do |service_name, service_properties|
   docker_service service_name do
     install_method service_properties['install_method'] if service_properties['install_method']
