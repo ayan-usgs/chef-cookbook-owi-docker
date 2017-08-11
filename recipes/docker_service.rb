@@ -7,6 +7,7 @@ include_recipe 'chef-yum-docker'
 
 # create files to deal with this error: Can't create ID mappings: No subuid ranges found for user "dockremap"
 # files are needed for the `--userns-remap argument`
+# see https://docs.docker.com/engine/security/userns-remap/ for further details
 file '/etc/subuid' do
   content 'dockremap:400000:65526'
   mode '0644'
