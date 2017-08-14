@@ -18,6 +18,18 @@ file '/etc/subgid' do
   mode '0644'
 end
 
+# enable user namespaces on CentOS 7 to improve container security
+# see http://rhelblog.redhat.com/2015/07/07/whats-next-for-containers-user-namespaces/ for more details
+# and https://docs.docker.com/engine/security/userns-remap/
+execute 'enable_user_namespaces' do
+  command 'grubby --args="user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)"'
+  not_if 'grep -q "user_namespace.enable=1" /proc/cmdline'
+end
+
+reboot 'enable_user_namespaces_reboot' do
+  subscribes :request_reboot, 'execute[enable_user_namespaces]', :immediately
+end
+
 node['owi_docker']['service'].each do |service_name, service_properties|
   docker_service service_name do
     install_method service_properties['install_method'] if service_properties['install_method']
